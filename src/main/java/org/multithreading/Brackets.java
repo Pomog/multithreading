@@ -1,12 +1,26 @@
 package org.multithreading;
 
 public class Brackets {
-    synchronized public void generate() {
+    public void generate() {
+        synchronized (this){
+            for (int i = 0; i < 10; i++) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                if (i < 5) {
+                    System.out.print("[");
+                } else {
+                    System.out.print("]");
+                }
+            }
+        }
         for (int i = 0; i < 10; i++) {
-            if (i < 5) {
-                System.out.print("[");
-            } else {
-                System.out.print("]");
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
         System.out.println();
