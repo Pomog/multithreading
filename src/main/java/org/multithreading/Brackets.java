@@ -1,9 +1,10 @@
 package org.multithreading;
 
 public class Brackets {
-    public void generate() {
-        synchronized (this){
-            for (int i = 0; i < 10; i++) {
+
+    private final Object lock1 = "lock1";
+    public static synchronized void generate(String threadCode) {
+              for (int i = 0; i < 10; i++) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
@@ -15,7 +16,7 @@ public class Brackets {
                     System.out.print("]");
                 }
             }
-        }
+
         for (int i = 0; i < 10; i++) {
             try {
                 Thread.sleep(10);
@@ -23,6 +24,6 @@ public class Brackets {
                 throw new RuntimeException(e);
             }
         }
-        System.out.println();
+        System.out.println("Generated with code: " + threadCode);
     }
 }
