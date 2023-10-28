@@ -10,9 +10,19 @@ public class Main {
 
         var app = new Main();
 
-       new Thread(() -> {
+        var threadWithDraw = new Thread(() -> {
             app.withdraw(100);
-        }).start();
+        });
+        threadWithDraw.start();
+
+       if (balance <= 0) {
+           try {
+               Thread.sleep(4000);
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           }
+           threadWithDraw.interrupt();
+       }
 
        new Thread(() -> {
            try {
@@ -70,11 +80,13 @@ public class Main {
                    System.out.println("Waiting for deposit...");
                    wait();
                } catch (InterruptedException e) {
-                   throw new RuntimeException(e);
+                   System.out.println("Thread interrupted");
+                   return;
                }
            }
        }
         balance -= amount;
+        System.out.println("Current balance: " + balance);
         System.out.println("Withdraw: " + amount + " successfully");
     }
 
