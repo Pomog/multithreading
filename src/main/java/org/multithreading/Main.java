@@ -6,9 +6,29 @@ public class Main {
 
     public static int balance = 0;
 
+    public int counter = 0;
+
     public static void main(String[] args) {
 
         var app = new Main();
+
+        var ThreadForJoin = new Thread(() -> {
+            System.out.println("Thread " + Thread.currentThread().getName() + " is now running");
+            System.out.println("Current thread priority is " + Thread.currentThread().getPriority());
+            for (int i = 0; i <= 1000; i++) {
+                app.counter++;
+            }
+            System.out.println("Thread " + Thread.currentThread().getName() + " is now finished");
+            System.out.println("Counter = " + app.counter);
+        });
+        ThreadForJoin.start();
+        try {
+            ThreadForJoin.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Counter in the Main Thread = " + app.counter);
 
         var threadWithDraw = new Thread(() -> {
             app.withdraw(100);
