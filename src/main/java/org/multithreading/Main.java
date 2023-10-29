@@ -1,5 +1,9 @@
 package org.multithreading;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class Main {
 
     volatile public static int flag = 0;
@@ -9,6 +13,43 @@ public class Main {
     public int counter = 0;
 
     public static void main(String[] args) {
+
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        var latch = new CountDownLatch(10);
+
+        var thread1 = new ThreadForPool("Thread 1", latch);
+        var thread2 = new ThreadForPool("Thread 2", latch);
+        var thread3 = new ThreadForPool("Thread 3", latch);
+        var thread4 = new ThreadForPool("Thread 4", latch);
+        var thread5 = new ThreadForPool("Thread 5", latch);
+        var thread6 = new ThreadForPool("Thread 6", latch);
+        var thread7 = new ThreadForPool("Thread 7", latch);
+        var thread8 = new ThreadForPool("Thread 8", latch);
+        var thread9 = new ThreadForPool("Thread 9", latch);
+        var thread10 = new ThreadForPool("Thread 10", latch);
+
+
+        executorService.execute(thread1);
+        executorService.execute(thread2);
+        executorService.execute(thread3);
+        executorService.execute(thread4);
+        executorService.execute(thread5);
+        executorService.execute(thread6);
+        executorService.execute(thread7);
+        executorService.execute(thread8);
+        executorService.execute(thread9);
+        executorService.execute(thread10);
+
+
+        executorService.shutdown();
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
 
         var app = new Main();
 
