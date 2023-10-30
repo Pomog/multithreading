@@ -1,5 +1,6 @@
 package org.multithreading;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -12,7 +13,26 @@ public class Main {
 
     public int counter = 0;
 
+    static int counter2 = 0;
+
     public static void main(String[] args) {
+
+        ArrayBlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10);
+        Producer producer = new Producer(queue);
+        Thread produserThread = new Thread(producer);
+        produserThread.start();
+
+        Consumer consumer = new Consumer(queue);
+        Thread consumerThread = new Thread(consumer);
+        consumerThread.start();
+
+        //wait for produserThread ends
+        try {
+            produserThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
