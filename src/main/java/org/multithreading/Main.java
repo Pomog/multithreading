@@ -8,26 +8,25 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Main {
-
     volatile public static int flag = 0;
-
     public static int balance = 0;
-
     public int counter = 0;
-
     static int counter2 = 0;
     static int counter3 = 0;
-
     static Lock lock = new ReentrantLock();
 
     public static void main(String[] args) {
 
         Thread reentrantLock1 = new Thread(() -> {
             lock.lock();
-            for (int i = 0; i < 10000; i++) {
-                Main.counter3++;
+            try {
+                for (int i = 0; i < 10000; i++) {
+                    Main.counter3++;
+                }
+            } finally {
+                lock.unlock();
             }
-            lock.unlock();
+
         });
 
         Thread reentrantLock2 = new Thread(() -> {
