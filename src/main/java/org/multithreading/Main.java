@@ -4,6 +4,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Main {
 
@@ -14,8 +16,42 @@ public class Main {
     public int counter = 0;
 
     static int counter2 = 0;
+    static int counter3 = 0;
+
+    static Lock lock = new ReentrantLock();
 
     public static void main(String[] args) {
+
+        Thread reentrantLock1 = new Thread(() -> {
+            lock.lock();
+            for (int i = 0; i < 10000; i++) {
+                Main.counter3++;
+            }
+            lock.unlock();
+        });
+
+        Thread reentrantLock2 = new Thread(() -> {
+            lock.lock();
+            for (int i = 0; i < 10000; i++) {
+                Main.counter3++;
+            }
+            lock.unlock();
+        });
+
+        reentrantLock1.start();
+        reentrantLock2.start();
+
+        try {
+            reentrantLock1.join();
+            reentrantLock2.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        System.out.println("Counter3 = " + Main.counter3);
+        System.out.println("reentrantLock ENDS");
+
+
 
         ArrayBlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10);
         Producer producer = new Producer(queue);
@@ -73,16 +109,7 @@ public class Main {
 
         var app = new Main();
 
-        var ThreadForJoin = new Thread(() -> {
-            System.out.println("Thread " + Thread.currentThread().getName() + " is now running");
-            System.out.println("Current thread priority is " + Thread.currentThread().getPriority());
-            for (int i = 0; i <= 1000; i++) {
-                app.counter++;
-            }
-            System.out.println("Thread " + Thread.currentThread().getName() + " is now finished");
-            System.out.println("Counter = " + app.counter);
-        });
-        ThreadForJoin.start();
+        var ThreadForJoin = getThread(app);
         try {
             ThreadForJoin.join();
         } catch (InterruptedException e) {
@@ -152,6 +179,20 @@ public class Main {
             long endTime = System.currentTimeMillis();
             System.out.println("Time taken for Thread 2:  " + (endTime - startTime) + "ms");
         }).start();
+    }
+
+    private static Thread getThread(Main app) {
+        var ThreadForJoin = new Thread(() -> {
+            System.out.println("Thread " + Thread.currentThread().getName() + " is now running");
+            System.out.println("Current thread priority is " + Thread.currentThread().getPriority());
+            for (int i = 0; i <= 1000; i++) {
+                app.counter++;
+            }
+            System.out.println("Thread " + Thread.currentThread().getName() + " is now finished");
+            System.out.println("Counter = " + app.counter);
+        });
+        ThreadForJoin.start();
+        return ThreadForJoin;
     }
 
     public void withdraw (int amount){
