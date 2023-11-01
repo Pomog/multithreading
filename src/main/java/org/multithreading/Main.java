@@ -1,9 +1,6 @@
 package org.multithreading;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -16,6 +13,105 @@ public class Main {
     static Lock lock = new ReentrantLock();
 
     public static void main(String[] args) {
+        var reentrantLock3 = new ReentrantLock();
+        var reentrantLock4 = new ReentrantLock();
+
+        Thread reentrantLockDeadLock1 = new Thread(() -> {
+            boolean flagLock1 = false;
+            boolean flagLock2 = false;
+            boolean doneFlag1 = false;
+            boolean doneFlag2 = false;
+
+            while (true) {
+                try {
+                    if (!flagLock1) {
+                        flagLock1 = reentrantLock3.tryLock(10, TimeUnit.MILLISECONDS);
+                    }
+                    if (!flagLock2){
+                        flagLock2 = reentrantLock4.tryLock(10, TimeUnit.MILLISECONDS);
+                    }
+
+                } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                } finally {
+                    if (flagLock1 && !doneFlag1) {
+                        System.out.println("Inside reentrantLockDeadLock1 on Lock1");
+                        reentrantLock3.unlock();
+                        doneFlag1 = true;
+                    }
+                    if (flagLock2 && !doneFlag2) {
+                        System.out.println("Inside reentrantLockDeadLock1 on Lock2");
+                        reentrantLock4.unlock();
+                        doneFlag2 = true;
+                    }
+                    if (flagLock1 && flagLock2) {
+                        break;
+                    }
+                }
+            }
+
+            reentrantLock3.lock();
+            System.out.println("Inside reentrantLockDeadLock1");
+                reentrantLock4.lock();
+                     System.out.println("Inside reentrantLockDeadLock2");
+                reentrantLock4.unlock();
+            reentrantLock3.unlock();
+
+        });
+
+        Thread reentrantLockDeadLock2 = new Thread(() -> {
+            boolean flagLock1 = false;
+            boolean flagLock2 = false;
+            boolean doneFlag1 = false;
+            boolean doneFlag2 = false;
+
+            while (true) {
+                try {
+                    if (!flagLock1) {
+                        flagLock1 = reentrantLock3.tryLock(10, TimeUnit.MILLISECONDS);
+                    }
+                    if (!flagLock2){
+                        flagLock2 = reentrantLock4.tryLock(10, TimeUnit.MILLISECONDS);
+                    }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } finally {
+                    if (flagLock1 && !doneFlag1) {
+                        System.out.println("Inside reentrantLockDeadLock2 on Lock1");
+                        reentrantLock3.unlock();
+                        doneFlag1 = true;
+                    }
+                    if (flagLock2 && !doneFlag2) {
+                        System.out.println("Inside reentrantLockDeadLock2 on Lock2");
+                        reentrantLock4.unlock();
+                        doneFlag2 = true;
+                    }
+                    if (flagLock1 && flagLock2) {
+                        break;
+                    }
+                }
+            }
+
+            reentrantLock3.lock();
+            System.out.println("Inside reentrantLockDeadLock1");
+            reentrantLock4.lock();
+            System.out.println("Inside reentrantLockDeadLock2");
+            reentrantLock4.unlock();
+            reentrantLock3.unlock();
+
+        });
+
+        reentrantLockDeadLock1.start();
+        reentrantLockDeadLock2.start();
+
+        try {
+            reentrantLockDeadLock1.join();
+            reentrantLockDeadLock2.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+
 
         Thread reentrantLock1 = new Thread(() -> {
             lock.lock();
